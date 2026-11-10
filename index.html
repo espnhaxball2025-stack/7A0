@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hola rod</title>
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+            overflow: hidden;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #58a6ff;
+        }
+        p {
+            font-size: 1.1rem;
+            color: #8b949e;
+        }
+        .cat-box {
+            font-size: 80px;
+            cursor: pointer;
+            margin-top: 20px;
+            user-select: none;
+            transition: transform 0.2s ease;
+        }
+        .cat-box:active {
+            transform: scale(1.25) rotate(-10deg);
+        }
+        .cute-cat {
+            font-size: 0.9rem;
+            color: #6e7681;
+            margin-top: 10px;
+        }
+        /* Ventanitas truchas que saltan por todos lados */
+        .fake-popup {
+            position: fixed;
+            background: #161b22;
+            border: 2px solid #ff5555;
+            color: white;
+            padding: 10px 15px;
+            font-family: monospace;
+            font-size: 14px;
+            box-shadow: 0 0 15px rgba(255, 85, 85, 0.5);
+            z-index: 9999;
+            border-radius: 5px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hola rod</h1>
+    <p>La página todavía está en desarrollo!</p>
+    <p>Mirá la animación cuando tocas tu cara</p>
+    
+    <div class="cat-box" id="michi" onclick="activarBroma()">🐱</div>
+    <div class="cute-cat">Cute cat</div>
+
+    <script>
+        let caosActivo = false;
+        let intervaloSonido = null;
+        let intervaloVentanas = null;
+        let temporizadorFin = null;
+        let audioCtx = null;
+
+        function activarBroma() {
+            if (caosActivo) return;
+            caosActivo = true;
+
+            // Arrancar el motor de audio para los pitidos molestos
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                intervaloSonido = setInterval(() => {
+                    if (!caosActivo) return;
+                    let osc = audioCtx.createOscillator();
+                    let gain = audioCtx.createGain();
+                    osc.type = 'sawtooth';
+                    // Frecuencia mutante para que sea bien insoportable
+                    osc.frequency.setValueAtTime(200 + Math.random() * 1200, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.1);
+                }, 120);
+            } catch(e) {
+                console.log("Audio bloqueado por el navegador");
+            }
+
+            // Lluvia de ventanitas chiquitas que se mueven y multiplican
+            intervaloVentanas = setInterval(() => {
+                if (!caosActivo) return;
+                let popup = document.createElement('div');
+                popup.className = 'fake-popup';
+                popup.innerText = "⚠️ ERROR CRÍTICO: ¡VIRUS DETECTADO! ⚠️";
+                
+                let x = Math.random() * (window.innerWidth - 250);
+                let y = Math.random() * (window.innerHeight - 80);
+                popup.style.left = x + 'px';
+                popup.style.top = y + 'px';
+                
+                document.body.appendChild(popup);
+
+                // Si le erras o se acumulan, multiplicamos otra enseguida
+                setTimeout(() => {
+                    popup.remove();
+                }, 1500);
+            }, 150);
+
+            // A los 60 segundos se corta toda la joda automáticamente
+            temporizadorFin = setTimeout(() => {
+                apagarCaos();
+            }, 60000);
+        }
+
+        function apagarCaos() {
+            caosActivo = false;
+            clearInterval(intervaloSonido);
+            clearInterval(intervaloVentanas);
+            clearTimeout(temporizadorFin);
+            if (audioCtx) audioCtx.close();
+            
+            // Borrar cualquier ventana que haya quedado colgada
+            document.querySelectorAll('.fake-popup').forEach(p => p.remove());
+            alert("¡Se terminó la joda por hoy, fantasma!");
+        }
+    </script>
+</body>
+</html>
